@@ -1,0 +1,405 @@
+---
+title: "Project 1"
+author: "Lauren Witek"
+date: "6/12/2020"
+output:
+  rmarkdown::github_document:
+    toc: yes
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(httr)
+library(jsonlite)
+library(kableExtra)
+library(ggplot2)
+library(DT)
+```
+
+
+# Introduction to JSON data 
+
+## What is JSON? 
+
+JSON (JavaScript Object Notation) is a open standard file format and a data-interchange format that was derived from JavaScript and is easy to read and write.^[1](https://www.json.org/json-en.htmlhttps://www.json.org/json-en.html)^ It uses readable text to store and transmit data objects.^[2](https://en.wikipedia.org/wiki/JSON)^ JSON uses conventions that are familiar to programmers of the C-family (ex. C, C++, C#, Java, etc) but is completely language dependent.^[1](https://www.json.org/json-en.htmlhttps://www.json.org/json-en.html)^ 
+
+JSON is built on two structures^[1](https://www.json.org/json-en.htmlhttps://www.json.org/json-en.html)^
+
+  1. *object* -  A collection of name/value pairs
+  2. *array* - An ordered list of values
+
+JSON Structure^[3](http://secretgeek.net/json_3mins)^
+  
+  1. An *object* is contained in a squiggly bracket (**{}**)
+  2. An *array* is surrounded by a square bracket (**[]**)
+  3. *Names* (with double quptes) and *values* are separated by a colon (**:**)
+      + A *value* can be a *string* with double quotes, a *number*, a *Boolean*, null, an *object* or an *array*
+  4. *Array* elements are separated by commas (**,**)
+  
+Here is a small sample of JSON:^[4](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON)^
+
+```{r, eval=FALSE}
+{
+  "squadName": "Super hero squad",
+  "homeTown": "Metro City",
+  "formed": 2016,
+  "secretBase": "Super tower",
+  "active": true,
+  "members": [
+    {
+      "name": "Molecule Man",
+      "age": 29,
+      "secretIdentity": "Dan Jukes",
+      "powers": [
+        "Radiation resistance",
+        "Turning tiny",
+        "Radiation blast"
+      ]
+    },
+    {
+      "name": "Madame Uppercut",
+      "age": 39,
+      "secretIdentity": "Jane Wilson",
+      "powers": [
+        "Million tonne punch",
+        "Damage resistance",
+        "Superhuman reflexes"
+      ]
+    },
+    {
+      "name": "Eternal Flame",
+      "age": 1000000,
+      "secretIdentity": "Unknown",
+      "powers": [
+        "Immortality",
+        "Heat Immunity",
+        "Inferno",
+        "Teleportation",
+        "Interdimensional travel"
+      ]
+    }
+  ]
+}
+```
+
+## Where does JSON get used? Why is it a good way to store data?
+
+JSON is commonly used in web applications for transmitting data due to its text only format. For example, sending some data from the server to the client, so that it can be displayed on the webpage. It has also become a popular format for database migration from modern apps over to SQL databases.^[5](https://blog.sqlizer.io/posts/json-store-data/#:~:text=It%20all%20depends%20on%20what%20you%20need%20to%20do&text=Stored%20JSON%20data%20must%20be,a%20bonus%20for%20database%20migration.)^  
+
+JSON is perfect for storing temporary data without the need for reporting. JSON provides a high level of interoperability since it can be used as a data format for any programming language. Stored JSON data *must* be text which allows them to be easily sent between servers.^[5](https://blog.sqlizer.io/posts/json-store-data/#:~:text=It%20all%20depends%20on%20what%20you%20need%20to%20do&text=Stored%20JSON%20data%20must%20be,a%20bonus%20for%20database%20migration.)^
+
+
+## Packages/Functions available for reading JSON data into R
+
+There are three major packages for JSON Data
+
+  1. `jsonlite`
+  2. `rjson`
+  3. `RJSONIO`
+  
+I have chosen to use `jsonlite` when pulling in JSON data. `jsonlite` can be combined with `dplyr` to work with JSON data easier and faster in R. Its main strength is that it can convert between R objects and JSON without loss of type or information. It is also ideal for interacting with web APIs which will be demonstrated below.^[6](https://cran.r-project.org/web/packages/jsonlite/vignettes/json-aaquickstart.html)^
+
+
+## References
+Information was procured from each of the following sites:
+
+  1. [Introducting JSON](https://www.json.org/json-en.html)
+  2. [JSON](https://en.wikipedia.org/wiki/JSON)
+  3. [What is JSON: the 3 minute JSON Tutorial](http://secretgeek.net/json_3mins)
+  4. [Working with JSON](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON)
+  5. [When should you store data as a JSON string?](https://blog.sqlizer.io/posts/json-store-data/#:~:text=It%20all%20depends%20on%20what%20you%20need%20to%20do&text=Stored%20JSON%20data%20must%20be,a%20bonus%20for%20database%20migration.)
+  6. [Getting started with JSON and jsonlite](https://cran.r-project.org/web/packages/jsonlite/vignettes/json-aaquickstart.html)
+  
+
+# Data: National Hockey League (NHL) API
+
+Exploring the dataset from the National Hockey League by reading the JSON file pulled from the [NHL API](https://records.nhl.com/site/api)
+
+This below function contacts the NHL records 'Franchise' API and returns well-formated, parsed data. It calls the API by useing the `fromJSON` function under the `jsonlite` package.  
+```{r,echo=FALSE, error=FALSE}
+nhl <- function(x, franId,  ...){
+  
+    full_url <- paste0("https://records.nhl.com/site/api", x)
+  
+  if (x == "/franchise"){
+    fran <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+    
+    fran <- as_tibble(fran$data)
+    
+    names(fran) <- c("ID", "First Season", "Last Season", "Team ID", "Team Name", "Team Location")
+    
+    fran
+  }
+  else if (x == "/franchise-team-totals"){
+    fran_team_total <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+    
+    fran_team_total <- as_tibble(fran_team_total$data)
+    
+    names(fran_team_total) <- c('ID', "Active Franchise", "First Season", "Franchise ID", "Game Type", 
+                                "Games Played", "Goals Against", "Goals For", "Home Losses", "Home Overtime Losses", 
+                                "Home Ties", "Home Wins", "Last Season", "Losses", "Overtime Losses", 
+                                "Penalty Minutes", "Points Percent per Game", "Points", "Road Losses", 
+                                "Road Overtime Losses", "Road Ties", "Road Wins", "Shootout Losses", "Shootout Wins",
+                                "Shutouts", "Team ID", "Team Name", "Ties", "Tri-Code", "Wins")
+    
+    fran_team_total
+  }
+  else if (x == "/franchise-season-records?cayenneExp=franchiseId=ID"){
+    full_url <- str_replace(full_url, "ID", as.character(franId))
+    
+    rec_fran <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+
+    rec_fran <- as_tibble(rec_fran$data)
+    
+    names(rec_fran) <- c("ID", "Fewest Goals", "Fewest Goals Against", "Fewest Goals Against Seasons", "Fewest Goals Seasons", 
+                             "Fewest Losses", "Fewest Losses Seasons", "Fewest Points", "Fewest Points Seasons","Fewest Ties", 
+                             "Fewest Ties Seasons", "Fewest Wins", "Fewest Wins Seasons", "Franchise ID", "Franchise Name", 
+                             "Home Loss Streak", "Home Loss Streak Dates","Home Point Streak", "Home Point Streak Dates", "Home Win Streak", 
+                             "Home Win Streak Dates", "Home Winless Streak", "Home Winless Streak Dates", "Loss Streak", "Loss Streak Dates", 
+                             "Most Game Goals", "Most Game Goals Dates", "Most Goals", "Most Goals Against", "Most Goals Against Seasons", 
+                             "Most Goals Seasons", "Most Losses", "Most Losses Seasons", "Most Penalty Minutes", "Most Penalty Minutes Seasons", 
+                             "Most Points", "Most Points Seasons", "Most Shutouts", "Most Shutouts Seasons", "Most Ties", 
+                             "Most Ties Seasons", "Most Wins", "Most Wins Seasons", "Point Streak", "Point Streak Dates", 
+                             "Road Loss Streak", "Road Loss Streak Dates", "Road Point Streak", "Road Point Streak Dates", "Road Win Streak", 
+                             "Road Win Streak Dates", "Road Winless Streak", "Road Winless Streak Dates", "Win Streak", "win Streak Dates", 
+                             "Winless Streak", "Winless Streak Dates")
+    
+    rec_fran
+  }
+  else if (x == "/franchise-goalie-records?cayenneExp=franchiseId=ID"){
+    full_url <- str_replace(full_url, "ID", as.character(franId))
+    
+    rec_goalie <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+    
+    rec_goalie <- as_tibble(rec_goalie$data)
+    
+    names(rec_goalie) <- c("ID", "Active Player", "First Name", "Franchise ID", "Franchise Name", "Game Type",
+                           "Games Played", "Last Name", "Losses", "Most Goals Against Dates", "Most Goals Against One Game",
+                           "Most Saves Dates"     , "Most Saves One Game", "Most Shots Against Dates", "Most Shots Against One Game",
+                           "Most Shutouts One Season", "Most Shutouts Season IDs", "Most Wins One Season", "Most Wins Season IDs",
+                           "Overtime Losses", "Player ID", "Position Code", "Rookie Games Played", "Rookie Shutouts", "Rookie Wins", 
+                           "Seasons", "Shutouts", "Ties", "Wins")
+    
+    rec_goalie
+  }
+  else if (x == "/franchise-skater-records?cayenneExp=franchiseId=ID"){
+    full_url <- str_replace(full_url, "ID", as.character(franId))
+    
+    rec_skater <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+
+    rec_skater <- as_tibble(rec_skater$data)
+
+    names(rec_skater) <- c("ID", "Active Player", "Assists", "First Name", "Franchise ID", 
+                          "Franchise Name", "Game Type", "Games Played", "Goals", "Last Name", 
+                          "Most Assists Game Dates", " Most Assists One Game", "Most Assists One Season", "Most Assists Season IDs", 
+                          "Most Goals Game Dates", "Most Goals One Game", "Most Goals One Season", "Most Goals Season IDs", 
+                          "Most Penalty Minutes One Season", "Most Penalty Minutes Season IDs","Most Points Game Dates", 
+                          "Most Points One Game", "Most Points One Season", "Most Points Season IDs", "Penalty Minutes", 
+                          "Player ID", "Points", "Position Code", "Rookie Points", "Seasons")
+    
+    rec_skater
+  }
+}
+
+```
+
+
+"/franchise" call: Returns Id, First Season ID, Last Season ID and Every team in the history of the NHL
+```{r}
+nhl("/franchise")
+```
+
+
+"/franchise-team-totals" call: Returns Total stats for every franchise
+```{r}
+nhl("/franchise-team-totals")
+```
+
+
+"/franchise-season-records?cayenneExp=franchiseId=ID" call: Drills-down into season records for for a specific franchise. Change which franchise is specified by changing the franchise ID. This is the same for the two following two calls. Here I have specified the franchise ID: 36 [Columbus Blue Jackets]. This is also the team called in the below two examples. 
+```{r}
+nhl("/franchise-season-records?cayenneExp=franchiseId=ID", 36)
+```
+
+
+"/franchise-goalie-records?cayenneExp=franchiseId=ID" call; Goalie records for the specific franchise.
+```{r}
+nhl("/franchise-goalie-records?cayenneExp=franchiseId=ID", 36)
+```
+
+
+"/franchise-skater-records?cayenneExp=franchiseId=ID" call: Skater records for the specified franchise. 
+```{r}
+nhl("/franchise-skater-records?cayenneExp=franchiseId=ID", 36)
+```
+
+
+## Exploratory Analysis
+
+```{r, echo=FALSE}
+
+full_url <- paste0("https://records.nhl.com/site/api", "/franchise")
+
+fran <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+
+fran <- as_tibble(fran$data)
+```
+
+
+Adding two new variables(Division and Conference) to the `fran` ("/franchise") data table and outputting a new data table called `div_conf` that includes each current teams Division and Conference. 
+```{r, out.width="50%"}
+div_conf <- fran %>% filter(is.na(lastSeasonId)) %>% 
+                  mutate(Division = ifelse(teamPlaceName %in% c("Washington", "Philadelphia", "Pittsburgh", "Carolina", "Columbus", 
+                                                                "New York", "New Jersey"), "Metropolitan",
+                                    ifelse(teamPlaceName %in% c("Boston", "Tampa Bay", "Toronto", "Florida", "Montréal", "Buffalo", 
+                                                                "Ottawa", "Detroit"), "Atlantic",
+                                    ifelse(teamPlaceName %in% c("St. Louis", "Colorado", "Dallas", "Winnipeg", "Nashville", "Minnesota",
+                                                                "Chicago"), "Central", 
+                                    ifelse(teamPlaceName %in% c("Vegas", "Edmonton", "Calgary", "Vancouver", "Arizona", "Anaheim", 
+                                                                "Los Angeles", "San Jose"), "Pacific", "Div"))))) %>% 
+                  mutate(Conference = ifelse(Division %in% c("Metropolitan", "Atlantic"), "Eastern",
+                                    ifelse(Division %in% c("Central", "Pacific"), "Western", "Conf"))) %>% 
+                  select(teamCommonName, teamPlaceName, Division, Conference) %>% 
+                  unite(teamName, teamPlaceName, teamCommonName, sep = " ")
+
+div_conf$Conference <- as.factor(div_conf$Conference)
+div_conf$Division <- as.factor(div_conf$Division)
+
+div_conf
+```
+
+
+```{r,echo=FALSE}
+full_url <- paste0("https://records.nhl.com/site/api", "/franchise-team-totals")
+
+fran_team_total <- fromJSON(content(GET(full_url), as = "text"), flatten = TRUE)
+
+fran_team_total <- as_tibble(fran_team_total$data)
+```
+
+
+Combining the `div_conf` and the `rec_total_team` ("/franchise-team-totals") data so that we can look at Division and Conference data. 
+```{r}
+total_team <- full_join(div_conf, fran_team_total, by = "teamName")
+
+total_teams <- total_team %>% filter(gameTypeId == 3) %>% select(id, teamName, everything()) %>% 
+                              filter(is.na(lastSeasonId)) %>% arrange(id) %>% mutate(PercentWins = round(wins/gamesPlayed, 3)) %>%
+                              mutate(PercentLoss = round(losses/gamesPlayed, 3))
+```
+
+
+## Creating Three Summary Tables
+
+  1. Overall Percentage of Wins and Losses for the Playoff Season by Team Name
+    
+    |Division    |Team with Highest Percent Wins| Team with Lowest Percent Losses|
+    |------------|------------------------------|--------------------------------|
+    |Atlantic    |Montréal Canadiens            |Florida Panthers                |
+    |Metropolitan|New York Islanders            |Columbus Blue Jackets           |
+    |Central     |Colorado Avalanche            |Minnesota Wild                  |
+    |Pacific     |Edmonton Oilers               |Los Angeles Kings               |
+    
+    Not only do the Montréal Candiens have the highest pecentage of wins for the Atlantic Division but they also hold that record for all current teams in the National Hockey League.
+
+```{r}
+table_all_wl <- total_teams %>% arrange(Conference, Division, desc(PercentWins)) %>% 
+                                 select(teamName, Division, Conference, wins, losses, gamesPlayed,  PercentWins, PercentLoss) %>% 
+                                 rename("Wins" = wins, "Losses" = losses, "TeamName" = teamName, "Games Played" = gamesPlayed, 
+                                        "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
+
+kable(table_all_wl, caption = "Overall Wins and Losses for the Playoff Season by Team Name")
+```
+
+
+  2. Overall Percentage of Wins and Losses for the Playoff Season by Division:
+  
+    Looking at the table below it is interesting to note that the Percentage of Wins and Losses for all Playoff Games is fairly even among the 4 Division. However, the Atlantic Division has been in the Playoff games almost almost 1000 more times then the next division. 
+  
+```{r}
+table_div_wl <- total_teams %>% group_by(Division, Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
+                                 arrange(Conference, desc(wins)) %>% mutate(PercentWins = round(wins/gamesPlayed, 3)) %>% mutate(PercentLoss = round(losses/gamesPlayed, 3)) %>%
+                                 rename("Wins" = wins, "Losses" = losses, "Games Played" = gamesPlayed, "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
+
+kable(table_div_wl, caption = "Overall Wins and Losses for the Playoff Season by Division")
+```
+
+
+  3. Overall Percentage of Wins and Losses for the Playoff Season by Conference:
+  
+    The Eastern Conference has a higher percentage of games won during the Playoff Season and also has almost double the amount of games played in the Playoffs.
+```{r}
+table_conf_wl <- total_teams %>% group_by(Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
+                                 mutate(PercentWins = round(wins/gamesPlayed, 3)) %>% mutate(PercentLoss = round(losses/gamesPlayed, 3)) %>% 
+                                 rename("Wins" = wins, "Losses" = losses, "Games Played" = gamesPlayed, "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
+
+kable(table_conf_wl, caption = "Overall Wins and Losses for the Playoff Season by Conference")
+```
+
+
+## Creating a Bar Graph to compare the Overall Percentage Total Wins and Losses for the Playoff Season
+
+Overall, the Pacific Division (excluding the Vegas Golden Knights) appears to be even in the amount of wins and losses accrued from Playoff Games. The Montréal Canadiens not only have the most wins in their Division but they also have the most wins for any team during the Playoff Season. 
+
+```{r, warning=FALSE}
+table_all_wl %>% gather(Outcome, Amount, 7:8) %>% 
+  ggplot(mapping = aes(TeamName, Amount, fill = Outcome)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      facet_wrap(~Division, scales = "free_y") +
+      coord_flip() +
+      labs(title = "Overall Percent of Total Wins and Losses for the Playoff Season", x = "Team Names", y = "Number of Games")
+```
+
+
+## Creating Boxplots for the Percentage of Wins and Losses by Division and Conference
+
+  1. The Boxplot for the Percentage of Wins shows that the Metropolitan Division has the highest average of winsand the Central Division has the lowest average of wins. The Boxplots show that there is a higher percentage chance of winning in the Eastern Conference than in the the Western Conference for Playoff Games.  
+  
+
+
+```{r}
+  table_all_wl %>% gather(Outcome, Amount, 7:8) %>% filter(Outcome == "Percent Won") %>% 
+    ggplot(mapping = aes(Division, Amount)) +
+      geom_boxplot() +
+      geom_point(aes(color = Division),stat = "identity", position = "jitter") +
+      facet_wrap(~Conference, labeller = label_both,  scales = "free_x") +
+      labs(title = "Percentage of Wins by Division and Conference for the Playoff Season", y = "Win Percentage") +
+      theme(legend.position="none")
+```
+
+
+  2. The Boxplot for the Percentage of Losses shows there are two potential outliers: one for the Atlantic Division and one for the Metropolitan Division. Outliers are shown by black dots. Thse black dots appear when the data is at least 1.5 times larger than the either the top or bottom of the interquartile range.
+
+```{r}
+  table_all_wl %>% gather(Outcome, Amount, 7:8) %>% filter(Outcome == "Percent Lost") %>%  
+    ggplot(mapping = aes(Division, Amount)) +
+      geom_boxplot() +
+      geom_point(aes(color = Division),stat = "identity", position = "jitter") +
+      facet_wrap(~Conference, labeller = label_both,  scales = "free_x") +
+      labs(title = "Percentage of Losses by Division and Conference for the Playoff Season", y = "Loss Percentage") + 
+      theme(legend.position="none")
+```
+
+
+```{r, echo=FALSE}
+total_games <- total_team %>%  filter(is.na(lastSeasonId)) %>% 
+                               arrange(id) %>% mutate(PercentWon = round(wins/gamesPlayed, 3)) %>%  
+                               select(teamName, Division, Conference, gameTypeId, PercentWon) %>% 
+                               spread(gameTypeId, PercentWon) %>% rename("Regular" = 4, "Playoff" = 5)
+```
+
+## Creating a Scatterplot with a Linear Model for the Percent of Games Won during the Regular Season vs the Playoff Season
+
+The scatter Plot shows that neither the Eastern nor Western Conferences follow a linear trend between the Regular Season and Playoff Season. 
+
+```{r, warning=FALSE}
+total_games %>%
+  ggplot(mapping = aes(Regular, Playoff)) +
+    geom_smooth(method = 'lm', color = "skyblue", aes(group = Conference)) +
+    geom_point(aes(color = Division), position = "jitter") +
+    labs(title = "Percent Won of Regular Seasion vs Playoff Season by Conference", x = "Playoff Win Percentage" , y = "Reagular Season Win Percentage")+
+    facet_wrap(~Conference, labeller = label_both, scales = "free_x") 
+```
+

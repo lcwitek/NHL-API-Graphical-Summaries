@@ -13,6 +13,16 @@ Lauren Witek
   - [Data: National Hockey League (NHL)
     API](#data-national-hockey-league-nhl-api)
       - [Exploratory Analysis](#exploratory-analysis)
+      - [Creating Three Summary Tables](#creating-three-summary-tables)
+      - [Creating a Bar Graph to compare the Overall Percentage Total
+        Wins and Losses for the Playoff
+        Season](#creating-a-bar-graph-to-compare-the-overall-percentage-total-wins-and-losses-for-the-playoff-season)
+      - [Creating Boxplots for the Percentage of Wins and Losses by
+        Division and
+        Conference](#creating-boxplots-for-the-percentage-of-wins-and-losses-by-division-and-conference)
+      - [Creating a Scatterplot with a Linear Model for the Percent of
+        Games Won during the Regular Season vs the Playoff
+        Season](#creating-a-scatterplot-with-a-linear-model-for-the-percent-of-games-won-during-the-regular-season-vs-the-playoff-season)
 
 # Introduction to JSON data
 
@@ -142,10 +152,11 @@ Exploring the dataset from the National Hockey League by reading the
 JSON file pulled from the [NHL API](https://records.nhl.com/site/api)
 
 This below function contacts the NHL records ‘Franchise’ API and returns
-well-formated, parsed data.
+well-formated, parsed data. It calls the API by useing the `fromJSON`
+function under the `jsonlite` package.
 
-Returns Id, First Season ID, Last Season ID and Every team in the
-history of the NHL
+“/franchise” call: Returns Id, First Season ID, Last Season ID and Every
+team in the history of the NHL
 
 ``` r
 nhl("/franchise")
@@ -166,7 +177,7 @@ nhl("/franchise")
     ## 10    10       19261927            NA         3 Rangers     New York       
     ## # ... with 28 more rows
 
-Returns Total stats fro every Franchise
+“/franchise-team-totals” call: Returns Total stats for every franchise
 
 ``` r
 nhl("/franchise-team-totals")
@@ -194,10 +205,12 @@ nhl("/franchise-team-totals")
     ## #   Losses` <int>, `Shootout Wins` <int>, Shutouts <int>, `Team ID` <int>,
     ## #   `Team Name` <chr>, Ties <int>, `Tri-Code` <chr>, Wins <int>
 
-Drill-down into season records for for a specific Franchise. Change
-which Franchise is specified by changing the Franchise ID. This is the
-same for the two following two calls. Here I have specified the Columbus
-Blue Jackets (also the team called in the below two examples).
+“/franchise-season-records?cayenneExp=franchiseId=ID” call: Drills-down
+into season records for for a specific franchise. Change which franchise
+is specified by changing the franchise ID. This is the same for the two
+following two calls. Here I have specified the franchise ID: 36
+\[Columbus Blue Jackets\]. This is also the team called in the below two
+examples.
 
 ``` r
 nhl("/franchise-season-records?cayenneExp=franchiseId=ID", 36)
@@ -228,133 +241,44 @@ nhl("/franchise-season-records?cayenneExp=franchiseId=ID", 36)
     ## #   Streak` <int>, `Road Winless Streak Dates` <chr>, `Win Streak` <int>, `win
     ## #   Streak Dates` <chr>, `Winless Streak` <int>, `Winless Streak Dates` <chr>
 
-Goalie records for the specific Franchise.
+“/franchise-goalie-records?cayenneExp=franchiseId=ID” call; Goalie
+records for the specific franchise.
 
 ``` r
 nhl("/franchise-goalie-records?cayenneExp=franchiseId=ID", 36)
 ```
 
-    ##      ID Active Player    First Name Franchise ID        Franchise Name
-    ## 1   284          TRUE        Sergei           36 Columbus Blue Jackets
-    ## 2   301         FALSE          Marc           36 Columbus Blue Jackets
-    ## 3   323         FALSE         Steve           36 Columbus Blue Jackets
-    ## 4   730         FALSE           Ron           36 Columbus Blue Jackets
-    ## 5   849         FALSE Jean-Francois           36 Columbus Blue Jackets
-    ## 6   852         FALSE          Fred           36 Columbus Blue Jackets
-    ## 7   923         FALSE         Brian           36 Columbus Blue Jackets
-    ## 8   946         FALSE       Mathieu           36 Columbus Blue Jackets
-    ## 9   991         FALSE        Martin           36 Columbus Blue Jackets
-    ## 10  996         FALSE        Curtis           36 Columbus Blue Jackets
-    ## 11 1015         FALSE            Ty           36 Columbus Blue Jackets
-    ## 12 1045         FALSE       Fredrik           36 Columbus Blue Jackets
-    ## 13 1049         FALSE          Mike           36 Columbus Blue Jackets
-    ## 14 1054          TRUE        Curtis           36 Columbus Blue Jackets
-    ## 15 1055         FALSE         David           36 Columbus Blue Jackets
-    ## 16 1056         FALSE          Wade           36 Columbus Blue Jackets
-    ##    Game Type Games Played   Last Name Losses           Most Goals Against Dates
-    ## 1          2          374   Bobrovsky    130             2018-12-04, 2018-10-13
-    ## 2          2          266       Denis    146                         2002-02-04
-    ## 3          2          232       Mason     99                         2009-11-11
-    ## 4          2           97     Tugnutt     52             2002-03-30, 2001-10-23
-    ## 5          2           14       Labbe      5                         2003-02-21
-    ## 6          2           21  Brathwaite     11                         2004-01-22
-    ## 7          2            3     Boucher      1 2007-03-30, 2007-03-17, 2007-03-03
-    ## 8          2           71       Garon     23                         2010-12-23
-    ## 9          2            9      Prusek      3                         2005-11-18
-    ## 10         2           36     Sanford     18                         2011-12-22
-    ## 11         2           11     Conklin      3             2007-02-02, 2007-01-31
-    ## 12         2          100     Norrena     45 2008-02-13, 2008-01-08, 2006-12-28
-    ## 13         2            4     McKenna      1                         2013-12-14
-    ## 14         2           85  McElhinney     33             2016-03-05, 2014-01-04
-    ## 15         2            1     Leneveu      0                         2011-04-03
-    ## 16         2            3 Dubielewicz      2                         2009-01-31
-    ##    Most Goals Against One Game                   Most Saves Dates
-    ## 1                            8                         2014-12-04
-    ## 2                            8                         2004-02-14
-    ## 3                            8             2010-11-19, 2008-12-17
-    ## 4                            7                         2000-10-31
-    ## 5                            6                         2002-03-11
-    ## 6                            7                         2004-03-26
-    ## 7                            3                         2007-03-03
-    ## 8                            6 2010-03-09, 2009-12-10, 2009-10-10
-    ## 9                            6                         2005-11-26
-    ## 10                           6                         2011-12-15
-    ## 11                           5                         2007-01-30
-    ## 12                           6                         2008-03-16
-    ## 13                           4                         2013-12-23
-    ## 14                           6                         2015-04-11
-    ## 15                           2                         2011-04-03
-    ## 16                           4                         2009-03-13
-    ##    Most Saves One Game Most Shots Against Dates Most Shots Against One Game
-    ## 1                   52               2014-12-04                          55
-    ## 2                   48               2002-11-12                          51
-    ## 3                   47               2010-11-19                          50
-    ## 4                   45               2000-10-31                          46
-    ## 5                   34               2003-02-21                          37
-    ## 6                   43               2004-03-26                          44
-    ## 7                   32               2007-03-03                          35
-    ## 8                   36               2009-12-10                          39
-    ## 9                   31               2005-11-26                          34
-    ## 10                  39               2011-12-15                          41
-    ## 11                  35   2007-01-31, 2007-01-30                          37
-    ## 12                  43               2008-03-16                          46
-    ## 13                  30               2013-12-23                          33
-    ## 14                  48               2015-04-11                          52
-    ## 15                  10               2011-04-03                          12
-    ## 16                  27               2009-03-13                          30
-    ##    Most Shutouts One Season     Most Shutouts Season IDs Most Wins One Season
-    ## 1                         9                     20182019                   41
-    ## 2                         5           20022003, 20032004                   27
-    ## 3                        10                     20082009                   33
-    ## 4                         4                     20002001                   22
-    ## 5                         0 20002001, 20012002, 20022003                    2
-    ## 6                         0                     20032004                    4
-    ## 7                         0                     20062007                    1
-    ## 8                         3                     20102011                   12
-    ## 9                         0                     20052006                    3
-    ## 10                        1                     20112012                   10
-    ## 11                        0                     20062007                    2
-    ## 12                        3                     20062007                   24
-    ## 13                        0                     20132014                    1
-    ## 14                        2                     20132014                   12
-    ## 15                        0                     20102011                    0
-    ## 16                        0                     20082009                    1
-    ##    Most Wins Season IDs Overtime Losses Player ID Position Code
-    ## 1              20162017              27   8475683             G
-    ## 2              20022003               1   8462055             G
-    ## 3              20082009              27   8473461             G
-    ## 4              20002001              NA   8451837             G
-    ## 5              20022003              NA   8459239             G
-    ## 6              20032004              NA   8459252             G
-    ## 7              20062007               0   8462052             G
-    ## 8              20092010              12   8464999             G
-    ## 9              20052006               0   8468037             G
-    ## 10             20112012               4   8468166             G
-    ## 11             20062007               2   8469152             G
-    ## 12             20062007              11   8470090             G
-    ## 13             20132014               1   8470093             G
-    ## 14             20142015               8   8470147             G
-    ## 15             20102011               0   8470263             G
-    ## 16             20082009               0   8470584             G
-    ##    Rookie Games Played Rookie Shutouts Rookie Wins Seasons Shutouts Ties Wins
-    ## 1                   NA              NA          NA       7       33    0  213
-    ## 2                   32               0           6       5       12   24   84
-    ## 3                   61              10          33       5       19   NA   96
-    ## 4                   NA              NA          NA       2        6    8   34
-    ## 5                   NA              NA          NA       3        0    0    3
-    ## 6                   NA              NA          NA       1        0    1    4
-    ## 7                   NA              NA          NA       1        0   NA    1
-    ## 8                   NA              NA          NA       2        5   NA   22
-    ## 9                   NA              NA          NA       1        0   NA    3
-    ## 10                  NA              NA          NA       1        1   NA   10
-    ## 11                  NA              NA          NA       1        0   NA    2
-    ## 12                  NA              NA          NA       3        5   NA   35
-    ## 13                  NA              NA          NA       1        0   NA    1
-    ## 14                  NA              NA          NA       4        2   NA   26
-    ## 15                  NA              NA          NA       1        0   NA    0
-    ## 16                  NA              NA          NA       1        0   NA    1
+    ## # A tibble: 16 x 29
+    ##       ID `Active Player` `First Name` `Franchise ID` `Franchise Name`
+    ##    <int> <lgl>           <chr>                 <int> <chr>           
+    ##  1   284 TRUE            Sergei                   36 Columbus Blue J~
+    ##  2   301 FALSE           Marc                     36 Columbus Blue J~
+    ##  3   323 FALSE           Steve                    36 Columbus Blue J~
+    ##  4   730 FALSE           Ron                      36 Columbus Blue J~
+    ##  5   849 FALSE           Jean-Franco~             36 Columbus Blue J~
+    ##  6   852 FALSE           Fred                     36 Columbus Blue J~
+    ##  7   923 FALSE           Brian                    36 Columbus Blue J~
+    ##  8   946 FALSE           Mathieu                  36 Columbus Blue J~
+    ##  9   991 FALSE           Martin                   36 Columbus Blue J~
+    ## 10   996 FALSE           Curtis                   36 Columbus Blue J~
+    ## 11  1015 FALSE           Ty                       36 Columbus Blue J~
+    ## 12  1045 FALSE           Fredrik                  36 Columbus Blue J~
+    ## 13  1049 FALSE           Mike                     36 Columbus Blue J~
+    ## 14  1054 TRUE            Curtis                   36 Columbus Blue J~
+    ## 15  1055 FALSE           David                    36 Columbus Blue J~
+    ## 16  1056 FALSE           Wade                     36 Columbus Blue J~
+    ## # ... with 24 more variables: `Game Type` <int>, `Games Played` <int>, `Last
+    ## #   Name` <chr>, Losses <int>, `Most Goals Against Dates` <chr>, `Most Goals
+    ## #   Against One Game` <int>, `Most Saves Dates` <chr>, `Most Saves One
+    ## #   Game` <int>, `Most Shots Against Dates` <chr>, `Most Shots Against One
+    ## #   Game` <int>, `Most Shutouts One Season` <int>, `Most Shutouts Season
+    ## #   IDs` <chr>, `Most Wins One Season` <int>, `Most Wins Season IDs` <chr>,
+    ## #   `Overtime Losses` <int>, `Player ID` <int>, `Position Code` <chr>, `Rookie
+    ## #   Games Played` <int>, `Rookie Shutouts` <int>, `Rookie Wins` <int>,
+    ## #   Seasons <int>, Shutouts <int>, Ties <int>, Wins <int>
 
-Skater records for the specified Franchise.
+“/franchise-skater-records?cayenneExp=franchiseId=ID” call: Skater
+records for the specified franchise.
 
 ``` r
 nhl("/franchise-skater-records?cayenneExp=franchiseId=ID", 36)
@@ -386,8 +310,9 @@ nhl("/franchise-skater-records?cayenneExp=franchiseId=ID", 36)
 
 ## Exploratory Analysis
 
-Adding two new variables(Division and Conference) to the `fran` data
-table and outputting a new data table call `div_conf`
+Adding two new variables(Division and Conference) to the `fran`
+(“/franchise”) data table and outputting a new data table called
+`div_conf` that includes each current teams Division and Conference.
 
 ``` r
 div_conf <- fran %>% filter(is.na(lastSeasonId)) %>% 
@@ -403,12 +328,16 @@ div_conf <- fran %>% filter(is.na(lastSeasonId)) %>%
                                     ifelse(Division %in% c("Central", "Pacific"), "Western", "Conf"))) %>% 
                   select(teamCommonName, teamPlaceName, Division, Conference) %>% 
                   unite(teamName, teamPlaceName, teamCommonName, sep = " ")
+
+div_conf$Conference <- as.factor(div_conf$Conference)
+div_conf$Division <- as.factor(div_conf$Division)
+
 div_conf
 ```
 
     ## # A tibble: 31 x 3
     ##    teamName            Division     Conference
-    ##    <chr>               <chr>        <chr>     
+    ##    <chr>               <fct>        <fct>     
     ##  1 Montréal Canadiens  Atlantic     Eastern   
     ##  2 Toronto Maple Leafs Atlantic     Eastern   
     ##  3 Boston Bruins       Atlantic     Eastern   
@@ -421,65 +350,48 @@ div_conf
     ## 10 Pittsburgh Penguins Metropolitan Eastern   
     ## # ... with 21 more rows
 
-Combining the `div_conf` and the `rec_total_team` data.
+Combining the `div_conf` and the `rec_total_team`
+(“/franchise-team-totals”) data so that we can look at Division and
+Conference data.
 
 ``` r
-total_teams <- full_join(div_conf, rec_team_total, by = "teamName")
+total_team <- full_join(div_conf, fran_team_total, by = "teamName")
 
-total_teams <- total_teams %>% select(id, teamName, everything()) %>% filter(is.na(lastSeasonId), gameTypeId == 2) %>% arrange(id)
-
-total_teams
+total_teams <- total_team %>% filter(gameTypeId == 3) %>% select(id, teamName, everything()) %>% 
+                              filter(is.na(lastSeasonId)) %>% arrange(id) %>% mutate(PercentWins = round(wins/gamesPlayed, 3)) %>%
+                              mutate(PercentLoss = round(losses/gamesPlayed, 3))
 ```
 
-    ## # A tibble: 31 x 32
-    ##       id teamName Division Conference activeFranchise firstSeasonId franchiseId
-    ##    <int> <chr>    <chr>    <chr>                <int>         <int>       <int>
-    ##  1     1 New Jer~ Metropo~ Eastern                  1      19821983          23
-    ##  2     3 New Yor~ Metropo~ Eastern                  1      19721973          22
-    ##  3     5 New Yor~ Metropo~ Eastern                  1      19261927          10
-    ##  4     8 Philade~ Metropo~ Eastern                  1      19671968          16
-    ##  5     9 Pittsbu~ Metropo~ Eastern                  1      19671968          17
-    ##  6    11 Boston ~ Atlantic Eastern                  1      19241925           6
-    ##  7    13 Buffalo~ Atlantic Eastern                  1      19701971          19
-    ##  8    16 Montréa~ Atlantic Eastern                  1      19171918           1
-    ##  9    17 Ottawa ~ Atlantic Eastern                  1      19921993          30
-    ## 10    19 Toronto~ Atlantic Eastern                  1      19271928           5
-    ## # ... with 21 more rows, and 25 more variables: gameTypeId <int>,
-    ## #   gamesPlayed <int>, goalsAgainst <int>, goalsFor <int>, homeLosses <int>,
-    ## #   homeOvertimeLosses <int>, homeTies <int>, homeWins <int>,
-    ## #   lastSeasonId <int>, losses <int>, overtimeLosses <int>,
-    ## #   penaltyMinutes <int>, pointPctg <dbl>, points <int>, roadLosses <int>,
-    ## #   roadOvertimeLosses <int>, roadTies <int>, roadWins <int>,
-    ## #   shootoutLosses <int>, shootoutWins <int>, shutouts <int>, teamId <int>,
-    ## #   ties <int>, triCode <chr>, wins <int>
+## Creating Three Summary Tables
+
+1.  Overall Percentage of Wins and Losses for the Playoff Season by Team
+    Name
+
+<!-- end list -->
+
+    |Division    |Team with Highest Percent Wins| Team with Lowest Percent Losses|
+    |------------|------------------------------|--------------------------------|
+    |Atlantic    |Montréal Canadiens            |Florida Panthers                |
+    |Metropolitan|New York Islanders            |Columbus Blue Jackets           |
+    |Central     |Colorado Avalanche            |Minnesota Wild                  |
+    |Pacific     |Edmonton Oilers               |Los Angeles Kings               |
+    
+    Not only do the Montréal Candiens have the highest pecentage of wins for the Atlantic Division but they also hold that record for all current teams in the National Hockey League.
 
 ``` r
-names(total_teams)
-```
+table_all_wl <- total_teams %>% arrange(Conference, Division, desc(PercentWins)) %>% 
+                                 select(teamName, Division, Conference, wins, losses, gamesPlayed,  PercentWins, PercentLoss) %>% 
+                                 rename("Wins" = wins, "Losses" = losses, "TeamName" = teamName, "Games Played" = gamesPlayed, 
+                                        "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
 
-    ##  [1] "id"                 "teamName"           "Division"          
-    ##  [4] "Conference"         "activeFranchise"    "firstSeasonId"     
-    ##  [7] "franchiseId"        "gameTypeId"         "gamesPlayed"       
-    ## [10] "goalsAgainst"       "goalsFor"           "homeLosses"        
-    ## [13] "homeOvertimeLosses" "homeTies"           "homeWins"          
-    ## [16] "lastSeasonId"       "losses"             "overtimeLosses"    
-    ## [19] "penaltyMinutes"     "pointPctg"          "points"            
-    ## [22] "roadLosses"         "roadOvertimeLosses" "roadTies"          
-    ## [25] "roadWins"           "shootoutLosses"     "shootoutWins"      
-    ## [28] "shutouts"           "teamId"             "ties"              
-    ## [31] "triCode"            "wins"
-
-``` r
-table_all_wlt <- total_teams %>% filter(gameTypeId == 2) %>% arrange(Conference, Division) %>% select(teamName, Division, Conference, wins, losses, ties) %>% rename("Wins" = wins, "Losses" = losses, "Ties" = ties, "TeamName" = teamName)
-
-kable(table_all_wlt, caption = "Overall Wins, Losses, and Ties for the Regular Season")
+kable(table_all_wl, caption = "Overall Wins and Losses for the Playoff Season by Team Name")
 ```
 
 <table>
 
 <caption>
 
-Overall Wins, Losses, and Ties for the Regular Season
+Overall Wins and Losses for the Playoff Season by Team Name
 
 </caption>
 
@@ -519,7 +431,19 @@ Losses
 
 <th style="text-align:right;">
 
-Ties
+Games Played
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Won
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Lost
 
 </th>
 
@@ -528,86 +452,6 @@ Ties
 </thead>
 
 <tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-Boston Bruins
-
-</td>
-
-<td style="text-align:left;">
-
-Atlantic
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
-
-</td>
-
-<td style="text-align:right;">
-
-3208
-
-</td>
-
-<td style="text-align:right;">
-
-2387
-
-</td>
-
-<td style="text-align:right;">
-
-791
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Buffalo Sabres
-
-</td>
-
-<td style="text-align:left;">
-
-Atlantic
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
-
-</td>
-
-<td style="text-align:right;">
-
-1790
-
-</td>
-
-<td style="text-align:right;">
-
-1530
-
-</td>
-
-<td style="text-align:right;">
-
-409
-
-</td>
-
-</tr>
 
 <tr>
 
@@ -631,139 +475,31 @@ Eastern
 
 <td style="text-align:right;">
 
-3449
+429
 
 </td>
 
 <td style="text-align:right;">
 
-2281
+312
 
 </td>
 
 <td style="text-align:right;">
 
-837
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Ottawa Senators
-
-</td>
-
-<td style="text-align:left;">
-
-Atlantic
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
+749
 
 </td>
 
 <td style="text-align:right;">
 
-948
+0.573
 
 </td>
 
 <td style="text-align:right;">
 
-912
-
-</td>
-
-<td style="text-align:right;">
-
-115
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Toronto Maple Leafs
-
-</td>
-
-<td style="text-align:left;">
-
-Atlantic
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
-
-</td>
-
-<td style="text-align:right;">
-
-2838
-
-</td>
-
-<td style="text-align:right;">
-
-2682
-
-</td>
-
-<td style="text-align:right;">
-
-773
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Florida Panthers
-
-</td>
-
-<td style="text-align:left;">
-
-Atlantic
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
-
-</td>
-
-<td style="text-align:right;">
-
-852
-
-</td>
-
-<td style="text-align:right;">
-
-856
-
-</td>
-
-<td style="text-align:right;">
-
-142
+0.417
 
 </td>
 
@@ -791,19 +527,31 @@ Eastern
 
 <td style="text-align:right;">
 
-949
+73
 
 </td>
 
 <td style="text-align:right;">
 
-930
+64
 
 </td>
 
 <td style="text-align:right;">
 
-112
+137
+
+</td>
+
+<td style="text-align:right;">
+
+0.533
+
+</td>
+
+<td style="text-align:right;">
+
+0.467
 
 </td>
 
@@ -831,19 +579,31 @@ Eastern
 
 <td style="text-align:right;">
 
-2872
+325
 
 </td>
 
 <td style="text-align:right;">
 
-2419
+293
 
 </td>
 
 <td style="text-align:right;">
 
-773
+618
+
+</td>
+
+<td style="text-align:right;">
+
+0.526
+
+</td>
+
+<td style="text-align:right;">
+
+0.474
 
 </td>
 
@@ -853,13 +613,13 @@ Eastern
 
 <td style="text-align:left;">
 
-New Jersey Devils
+Boston Bruins
 
 </td>
 
 <td style="text-align:left;">
 
-Metropolitan
+Atlantic
 
 </td>
 
@@ -871,19 +631,239 @@ Eastern
 
 <td style="text-align:right;">
 
-1375
+321
 
 </td>
 
 <td style="text-align:right;">
 
-1181
+324
 
 </td>
 
 <td style="text-align:right;">
 
-219
+651
+
+</td>
+
+<td style="text-align:right;">
+
+0.493
+
+</td>
+
+<td style="text-align:right;">
+
+0.498
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Buffalo Sabres
+
+</td>
+
+<td style="text-align:left;">
+
+Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+124
+
+</td>
+
+<td style="text-align:right;">
+
+132
+
+</td>
+
+<td style="text-align:right;">
+
+256
+
+</td>
+
+<td style="text-align:right;">
+
+0.484
+
+</td>
+
+<td style="text-align:right;">
+
+0.516
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Ottawa Senators
+
+</td>
+
+<td style="text-align:left;">
+
+Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+72
+
+</td>
+
+<td style="text-align:right;">
+
+79
+
+</td>
+
+<td style="text-align:right;">
+
+151
+
+</td>
+
+<td style="text-align:right;">
+
+0.477
+
+</td>
+
+<td style="text-align:right;">
+
+0.523
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Toronto Maple Leafs
+
+</td>
+
+<td style="text-align:left;">
+
+Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+254
+
+</td>
+
+<td style="text-align:right;">
+
+276
+
+</td>
+
+<td style="text-align:right;">
+
+533
+
+</td>
+
+<td style="text-align:right;">
+
+0.477
+
+</td>
+
+<td style="text-align:right;">
+
+0.518
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Florida Panthers
+
+</td>
+
+<td style="text-align:left;">
+
+Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+18
+
+</td>
+
+<td style="text-align:right;">
+
+26
+
+</td>
+
+<td style="text-align:right;">
+
+44
+
+</td>
+
+<td style="text-align:right;">
+
+0.409
+
+</td>
+
+<td style="text-align:right;">
+
+0.591
 
 </td>
 
@@ -911,99 +891,31 @@ Eastern
 
 <td style="text-align:right;">
 
-1656
+148
 
 </td>
 
 <td style="text-align:right;">
 
-1570
+124
 
 </td>
 
 <td style="text-align:right;">
 
-347
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-New York Rangers
-
-</td>
-
-<td style="text-align:left;">
-
-Metropolitan
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
+272
 
 </td>
 
 <td style="text-align:right;">
 
-2856
+0.544
 
 </td>
 
 <td style="text-align:right;">
 
-2693
-
-</td>
-
-<td style="text-align:right;">
-
-808
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Philadelphia Flyers
-
-</td>
-
-<td style="text-align:left;">
-
-Metropolitan
-
-</td>
-
-<td style="text-align:left;">
-
-Eastern
-
-</td>
-
-<td style="text-align:right;">
-
-2054
-
-</td>
-
-<td style="text-align:right;">
-
-1429
-
-</td>
-
-<td style="text-align:right;">
-
-457
+0.456
 
 </td>
 
@@ -1031,19 +943,83 @@ Eastern
 
 <td style="text-align:right;">
 
-1866
+206
 
 </td>
 
 <td style="text-align:right;">
 
-1718
+175
 
 </td>
 
 <td style="text-align:right;">
 
-383
+381
+
+</td>
+
+<td style="text-align:right;">
+
+0.541
+
+</td>
+
+<td style="text-align:right;">
+
+0.459
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+New Jersey Devils
+
+</td>
+
+<td style="text-align:left;">
+
+Metropolitan
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+137
+
+</td>
+
+<td style="text-align:right;">
+
+120
+
+</td>
+
+<td style="text-align:right;">
+
+257
+
+</td>
+
+<td style="text-align:right;">
+
+0.533
+
+</td>
+
+<td style="text-align:right;">
+
+0.467
 
 </td>
 
@@ -1071,19 +1047,83 @@ Eastern
 
 <td style="text-align:right;">
 
-791
+49
 
 </td>
 
 <td style="text-align:right;">
 
-713
+44
 
 </td>
 
 <td style="text-align:right;">
 
-86
+93
+
+</td>
+
+<td style="text-align:right;">
+
+0.527
+
+</td>
+
+<td style="text-align:right;">
+
+0.473
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Philadelphia Flyers
+
+</td>
+
+<td style="text-align:left;">
+
+Metropolitan
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+221
+
+</td>
+
+<td style="text-align:right;">
+
+212
+
+</td>
+
+<td style="text-align:right;">
+
+433
+
+</td>
+
+<td style="text-align:right;">
+
+0.510
+
+</td>
+
+<td style="text-align:right;">
+
+0.490
 
 </td>
 
@@ -1111,19 +1151,83 @@ Eastern
 
 <td style="text-align:right;">
 
-1664
+135
 
 </td>
 
 <td style="text-align:right;">
 
-1452
+147
 
 </td>
 
 <td style="text-align:right;">
 
-303
+282
+
+</td>
+
+<td style="text-align:right;">
+
+0.479
+
+</td>
+
+<td style="text-align:right;">
+
+0.521
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+New York Rangers
+
+</td>
+
+<td style="text-align:left;">
+
+Metropolitan
+
+</td>
+
+<td style="text-align:left;">
+
+Eastern
+
+</td>
+
+<td style="text-align:right;">
+
+244
+
+</td>
+
+<td style="text-align:right;">
+
+263
+
+</td>
+
+<td style="text-align:right;">
+
+515
+
+</td>
+
+<td style="text-align:right;">
+
+0.474
+
+</td>
+
+<td style="text-align:right;">
+
+0.511
 
 </td>
 
@@ -1151,139 +1255,31 @@ Eastern
 
 <td style="text-align:right;">
 
-660
+11
 
 </td>
 
 <td style="text-align:right;">
 
-672
+20
 
 </td>
 
 <td style="text-align:right;">
 
-33
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Chicago Blackhawks
-
-</td>
-
-<td style="text-align:left;">
-
-Central
-
-</td>
-
-<td style="text-align:left;">
-
-Western
+31
 
 </td>
 
 <td style="text-align:right;">
 
-2788
+0.355
 
 </td>
 
 <td style="text-align:right;">
 
-2736
-
-</td>
-
-<td style="text-align:right;">
-
-814
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Nashville Predators
-
-</td>
-
-<td style="text-align:left;">
-
-Central
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-821
-
-</td>
-
-<td style="text-align:right;">
-
-633
-
-</td>
-
-<td style="text-align:right;">
-
-60
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-St. Louis Blues
-
-</td>
-
-<td style="text-align:left;">
-
-Central
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-1902
-
-</td>
-
-<td style="text-align:right;">
-
-1625
-
-</td>
-
-<td style="text-align:right;">
-
-432
+0.645
 
 </td>
 
@@ -1311,19 +1307,31 @@ Western
 
 <td style="text-align:right;">
 
-968
+109
 
 </td>
 
 <td style="text-align:right;">
 
-715
+85
 
 </td>
 
 <td style="text-align:right;">
 
-101
+194
+
+</td>
+
+<td style="text-align:right;">
+
+0.562
+
+</td>
+
+<td style="text-align:right;">
+
+0.438
 
 </td>
 
@@ -1351,19 +1359,31 @@ Western
 
 <td style="text-align:right;">
 
-1061
+90
 
 </td>
 
 <td style="text-align:right;">
 
-719
+83
 
 </td>
 
 <td style="text-align:right;">
 
-125
+173
+
+</td>
+
+<td style="text-align:right;">
+
+0.520
+
+</td>
+
+<td style="text-align:right;">
+
+0.480
 
 </td>
 
@@ -1373,7 +1393,7 @@ Western
 
 <td style="text-align:left;">
 
-Minnesota Wild
+Chicago Blackhawks
 
 </td>
 
@@ -1391,19 +1411,135 @@ Western
 
 <td style="text-align:right;">
 
-724
+264
 
 </td>
 
 <td style="text-align:right;">
 
-583
+270
 
 </td>
 
 <td style="text-align:right;">
 
-55
+539
+
+</td>
+
+<td style="text-align:right;">
+
+0.490
+
+</td>
+
+<td style="text-align:right;">
+
+0.501
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+St. Louis Blues
+
+</td>
+
+<td style="text-align:left;">
+
+Central
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+180
+
+</td>
+
+<td style="text-align:right;">
+
+211
+
+</td>
+
+<td style="text-align:right;">
+
+391
+
+</td>
+
+<td style="text-align:right;">
+
+0.460
+
+</td>
+
+<td style="text-align:right;">
+
+0.540
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Nashville Predators
+
+</td>
+
+<td style="text-align:left;">
+
+Central
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+51
+
+</td>
+
+<td style="text-align:right;">
+
+60
+
+</td>
+
+<td style="text-align:right;">
+
+111
+
+</td>
+
+<td style="text-align:right;">
+
+0.459
+
+</td>
+
+<td style="text-align:right;">
+
+0.541
 
 </td>
 
@@ -1431,19 +1567,31 @@ Western
 
 <td style="text-align:right;">
 
-352
+11
 
 </td>
 
 <td style="text-align:right;">
 
-269
+16
 
 </td>
 
 <td style="text-align:right;">
 
-NA
+27
+
+</td>
+
+<td style="text-align:right;">
+
+0.407
+
+</td>
+
+<td style="text-align:right;">
+
+0.593
 
 </td>
 
@@ -1453,13 +1601,13 @@ NA
 
 <td style="text-align:left;">
 
-Calgary Flames
+Minnesota Wild
 
 </td>
 
 <td style="text-align:left;">
 
-Pacific
+Central
 
 </td>
 
@@ -1471,19 +1619,31 @@ Western
 
 <td style="text-align:right;">
 
-1471
+26
 
 </td>
 
 <td style="text-align:right;">
 
-1209
+47
 
 </td>
 
 <td style="text-align:right;">
 
-271
+73
+
+</td>
+
+<td style="text-align:right;">
+
+0.356
+
+</td>
+
+<td style="text-align:right;">
+
+0.644
 
 </td>
 
@@ -1511,219 +1671,31 @@ Western
 
 <td style="text-align:right;">
 
-1434
+159
 
 </td>
 
 <td style="text-align:right;">
 
-1318
+105
 
 </td>
 
 <td style="text-align:right;">
 
-262
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Vancouver Canucks
-
-</td>
-
-<td style="text-align:left;">
-
-Pacific
-
-</td>
-
-<td style="text-align:left;">
-
-Western
+264
 
 </td>
 
 <td style="text-align:right;">
 
-1626
+0.602
 
 </td>
 
 <td style="text-align:right;">
 
-1717
-
-</td>
-
-<td style="text-align:right;">
-
-391
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Anaheim Ducks
-
-</td>
-
-<td style="text-align:left;">
-
-Pacific
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-973
-
-</td>
-
-<td style="text-align:right;">
-
-804
-
-</td>
-
-<td style="text-align:right;">
-
-107
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Los Angeles Kings
-
-</td>
-
-<td style="text-align:left;">
-
-Pacific
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-1733
-
-</td>
-
-<td style="text-align:right;">
-
-1801
-
-</td>
-
-<td style="text-align:right;">
-
-424
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-San Jose Sharks
-
-</td>
-
-<td style="text-align:left;">
-
-Pacific
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-1049
-
-</td>
-
-<td style="text-align:right;">
-
-892
-
-</td>
-
-<td style="text-align:right;">
-
-121
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Arizona Coyotes
-
-</td>
-
-<td style="text-align:left;">
-
-Pacific
-
-</td>
-
-<td style="text-align:left;">
-
-Western
-
-</td>
-
-<td style="text-align:right;">
-
-190
-
-</td>
-
-<td style="text-align:right;">
-
-236
-
-</td>
-
-<td style="text-align:right;">
-
-NA
+0.398
 
 </td>
 
@@ -1751,19 +1723,291 @@ Western
 
 <td style="text-align:right;">
 
-133
+16
 
 </td>
 
 <td style="text-align:right;">
 
-80
+11
 
 </td>
 
 <td style="text-align:right;">
 
-NA
+27
+
+</td>
+
+<td style="text-align:right;">
+
+0.593
+
+</td>
+
+<td style="text-align:right;">
+
+0.407
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Anaheim Ducks
+
+</td>
+
+<td style="text-align:left;">
+
+Pacific
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+89
+
+</td>
+
+<td style="text-align:right;">
+
+73
+
+</td>
+
+<td style="text-align:right;">
+
+162
+
+</td>
+
+<td style="text-align:right;">
+
+0.549
+
+</td>
+
+<td style="text-align:right;">
+
+0.451
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+San Jose Sharks
+
+</td>
+
+<td style="text-align:left;">
+
+Pacific
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+119
+
+</td>
+
+<td style="text-align:right;">
+
+122
+
+</td>
+
+<td style="text-align:right;">
+
+241
+
+</td>
+
+<td style="text-align:right;">
+
+0.494
+
+</td>
+
+<td style="text-align:right;">
+
+0.506
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Calgary Flames
+
+</td>
+
+<td style="text-align:left;">
+
+Pacific
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+98
+
+</td>
+
+<td style="text-align:right;">
+
+113
+
+</td>
+
+<td style="text-align:right;">
+
+211
+
+</td>
+
+<td style="text-align:right;">
+
+0.464
+
+</td>
+
+<td style="text-align:right;">
+
+0.536
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Vancouver Canucks
+
+</td>
+
+<td style="text-align:left;">
+
+Pacific
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+101
+
+</td>
+
+<td style="text-align:right;">
+
+128
+
+</td>
+
+<td style="text-align:right;">
+
+229
+
+</td>
+
+<td style="text-align:right;">
+
+0.441
+
+</td>
+
+<td style="text-align:right;">
+
+0.559
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Los Angeles Kings
+
+</td>
+
+<td style="text-align:left;">
+
+Pacific
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+111
+
+</td>
+
+<td style="text-align:right;">
+
+144
+
+</td>
+
+<td style="text-align:right;">
+
+255
+
+</td>
+
+<td style="text-align:right;">
+
+0.435
+
+</td>
+
+<td style="text-align:right;">
+
+0.565
 
 </td>
 
@@ -1773,19 +2017,29 @@ NA
 
 </table>
 
+2.  Overall Percentage of Wins and Losses for the Playoff Season by
+    Division:
+    
+    Looking at the table below it is interesting to note that the
+    Percentage of Wins and Losses for all Playoff Games is fairly even
+    among the 4 Division. However, the Atlantic Division has been in the
+    Playoff games almost almost 1000 more times then the next division.
+
+<!-- end list -->
+
 ``` r
-table_all_wlt <- table_all_wlt %>% gather(Outcome, Amount, 4:6)
+table_div_wl <- total_teams %>% group_by(Division, Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
+                                 arrange(Conference, desc(wins)) %>% mutate(PercentWins = round(wins/gamesPlayed, 3)) %>% mutate(PercentLoss = round(losses/gamesPlayed, 3)) %>%
+                                 rename("Wins" = wins, "Losses" = losses, "Games Played" = gamesPlayed, "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
 
-table_div_wlt <- total_teams %>% filter(gameTypeId == 2) %>%  group_by(Division, Conference) %>% summarise(wins = sum(wins), losses = sum(losses), ties = sum(ties, na.rm = TRUE)) %>% rename("Wins" = wins, "Losses" = losses, "Ties" = ties)
-
-kable(table_div_wlt, caption = "Overall Wins, Losses, and Ties for the Regular Season by Division")
+kable(table_div_wl, caption = "Overall Wins and Losses for the Playoff Season by Division")
 ```
 
 <table>
 
 <caption>
 
-Overall Wins, Losses, and Ties for the Regular Season by Division
+Overall Wins and Losses for the Playoff Season by Division
 
 </caption>
 
@@ -1819,7 +2073,19 @@ Losses
 
 <th style="text-align:right;">
 
-Ties
+Games Played
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Won
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Lost
 
 </th>
 
@@ -1845,53 +2111,31 @@ Eastern
 
 <td style="text-align:right;">
 
-16906
+1616
 
 </td>
 
 <td style="text-align:right;">
 
-13997
+1506
 
 </td>
 
 <td style="text-align:right;">
 
-3952
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-Central
-
-</td>
-
-<td style="text-align:left;">
-
-Western
+3139
 
 </td>
 
 <td style="text-align:right;">
 
-8616
+0.515
 
 </td>
 
 <td style="text-align:right;">
 
-7280
-
-</td>
-
-<td style="text-align:right;">
-
-1587
+0.480
 
 </td>
 
@@ -1913,19 +2157,77 @@ Eastern
 
 <td style="text-align:right;">
 
-12922
+1151
 
 </td>
 
 <td style="text-align:right;">
 
-11428
+1105
 
 </td>
 
 <td style="text-align:right;">
 
-2636
+2264
+
+</td>
+
+<td style="text-align:right;">
+
+0.508
+
+</td>
+
+<td style="text-align:right;">
+
+0.488
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Central
+
+</td>
+
+<td style="text-align:left;">
+
+Western
+
+</td>
+
+<td style="text-align:right;">
+
+731
+
+</td>
+
+<td style="text-align:right;">
+
+772
+
+</td>
+
+<td style="text-align:right;">
+
+1508
+
+</td>
+
+<td style="text-align:right;">
+
+0.485
+
+</td>
+
+<td style="text-align:right;">
+
+0.512
 
 </td>
 
@@ -1947,19 +2249,31 @@ Western
 
 <td style="text-align:right;">
 
-8609
+693
 
 </td>
 
 <td style="text-align:right;">
 
-8057
+696
 
 </td>
 
 <td style="text-align:right;">
 
-1576
+1389
+
+</td>
+
+<td style="text-align:right;">
+
+0.499
+
+</td>
+
+<td style="text-align:right;">
+
+0.501
 
 </td>
 
@@ -1969,17 +2283,28 @@ Western
 
 </table>
 
-``` r
-table_conf_wlt <- table_div_wlt %>% group_by(Conference) %>% summarise(Wins = sum(Wins), Losses = sum(Losses), Ties = sum(Ties))
+3.  Overall Percentage of Wins and Losses for the Playoff Season by
+    Conference:
+    
+    The Eastern Conference has a higher percentage of games won during
+    the Playoff Season and also has almost double the amount of games
+    played in the Playoffs.
 
-kable(table_conf_wlt, caption = "Overall Wins, Losses, and Ties for the Regular Season by Conference")
+<!-- end list -->
+
+``` r
+table_conf_wl <- total_teams %>% group_by(Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
+                                 mutate(PercentWins = round(wins/gamesPlayed, 3)) %>% mutate(PercentLoss = round(losses/gamesPlayed, 3)) %>% 
+                                 rename("Wins" = wins, "Losses" = losses, "Games Played" = gamesPlayed, "Percent Won" = PercentWins, "Percent Lost" = PercentLoss)
+
+kable(table_conf_wl, caption = "Overall Wins and Losses for the Playoff Season by Conference")
 ```
 
 <table>
 
 <caption>
 
-Overall Wins, Losses, and Ties for the Regular Season by Conference
+Overall Wins and Losses for the Playoff Season by Conference
 
 </caption>
 
@@ -2007,7 +2332,19 @@ Losses
 
 <th style="text-align:right;">
 
-Ties
+Games Played
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Won
+
+</th>
+
+<th style="text-align:right;">
+
+Percent Lost
 
 </th>
 
@@ -2027,19 +2364,31 @@ Eastern
 
 <td style="text-align:right;">
 
-29828
+2767
 
 </td>
 
 <td style="text-align:right;">
 
-25425
+2611
 
 </td>
 
 <td style="text-align:right;">
 
-6588
+5403
+
+</td>
+
+<td style="text-align:right;">
+
+0.512
+
+</td>
+
+<td style="text-align:right;">
+
+0.483
 
 </td>
 
@@ -2055,19 +2404,31 @@ Western
 
 <td style="text-align:right;">
 
-17225
+1424
 
 </td>
 
 <td style="text-align:right;">
 
-15337
+1468
 
 </td>
 
 <td style="text-align:right;">
 
-3163
+2897
+
+</td>
+
+<td style="text-align:right;">
+
+0.492
+
+</td>
+
+<td style="text-align:right;">
+
+0.507
 
 </td>
 
@@ -2077,21 +2438,79 @@ Western
 
 </table>
 
+## Creating a Bar Graph to compare the Overall Percentage Total Wins and Losses for the Playoff Season
+
+Overall, the Pacific Division (excluding the Vegas Golden Knights)
+appears to be even in the amount of wins and losses accrued from Playoff
+Games. The Montréal Canadiens not only have the most wins in their
+Division but they also have the most wins for any team during the
+Playoff Season.
+
 ``` r
-table_all_wlt %>% 
+table_all_wl %>% gather(Outcome, Amount, 7:8) %>% 
   ggplot(mapping = aes(TeamName, Amount, fill = Outcome)) +
       geom_bar(stat = "identity", position = "dodge") +
-      facet_wrap(~Division, scales = "free") +
+      facet_wrap(~Division, scales = "free_y") +
       coord_flip() +
-      labs(title = "Overall Total Wins, Losses, and Ties for the Regular Season", x = "Team Names", Y = "Number of Games")
+      labs(title = "Overall Percent of Total Wins and Losses for the Playoff Season", x = "Team Names", y = "Number of Games")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+## Creating Boxplots for the Percentage of Wins and Losses by Division and Conference
+
+1.  The Boxplot for the Percentage of Wins shows that the Metropolitan
+    Division has the highest average of winsand the Central Division has
+    the lowest average of wins. The Boxplots show that there is a higher
+    percentage chance of winning in the Eastern Conference than in the
+    the Western Conference for Playoff Games.
+
+<!-- end list -->
 
 ``` r
-## Box plot for each division with dots on top for each team. Or box plot for 1 division but for wins, losses, and ties with dots on top. 
+  table_all_wl %>% gather(Outcome, Amount, 7:8) %>% filter(Outcome == "Percent Won") %>% 
+    ggplot(mapping = aes(Division, Amount)) +
+      geom_boxplot() +
+      geom_point(aes(color = Division),stat = "identity", position = "jitter") +
+      facet_wrap(~Conference, labeller = label_both,  scales = "free_x") +
+      labs(title = "Percentage of Wins by Division and Conference for the Playoff Season", y = "Win Percentage") +
+      theme(legend.position="none")
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+2.  The Boxplot for the Percentage of Losses shows there are two
+    potential outliers: one for the Atlantic Division and one for the
+    Metropolitan Division. Outliers are shown by black dots. Thse black
+    dots appear when the data is at least 1.5 times larger than the
+    either the top or bottom of the interquartile range.
+
+<!-- end list -->
+
 ``` r
-##Ideas: Home wins vs road wins by division scatter plot with regression line
+  table_all_wl %>% gather(Outcome, Amount, 7:8) %>% filter(Outcome == "Percent Lost") %>%  
+    ggplot(mapping = aes(Division, Amount)) +
+      geom_boxplot() +
+      geom_point(aes(color = Division),stat = "identity", position = "jitter") +
+      facet_wrap(~Conference, labeller = label_both,  scales = "free_x") +
+      labs(title = "Percentage of Losses by Division and Conference for the Playoff Season", y = "Loss Percentage") + 
+      theme(legend.position="none")
 ```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+## Creating a Scatterplot with a Linear Model for the Percent of Games Won during the Regular Season vs the Playoff Season
+
+The scatter Plot shows that neither the Eastern nor Western Conferences
+follow a linear trend between the Regular Season and Playoff Season.
+
+``` r
+total_games %>%
+  ggplot(mapping = aes(Regular, Playoff)) +
+    geom_smooth(method = 'lm', color = "skyblue", aes(group = Conference)) +
+    geom_point(aes(color = Division), position = "jitter") +
+    labs(title = "Percent Won of Regular Seasion vs Playoff Season by Conference", x = "Playoff Win Percentage" , y = "Reagular Season Win Percentage")+
+    facet_wrap(~Conference, labeller = label_both, scales = "free_x") 
+```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
