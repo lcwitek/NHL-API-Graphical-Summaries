@@ -48,7 +48,7 @@ JSON Structure<sup>[3](http://secretgeek.net/json_3mins)</sup>
 
 1.  An *object* is contained in a squiggly bracket (**{}**)
 2.  An *array* is surrounded by a square bracket (**\[\]**)
-3.  *Names* (with double quptes) and *values* are separated by a colon
+3.  *Names* (with double quotes) and *values* are separated by a colon
     (**:**)
       - A *value* can be a *string* with double quotes, a *number*, a
         *Boolean*, null, an *object* or an *array*
@@ -367,16 +367,16 @@ total_teams <- total_team %>% filter(gameTypeId == 3) %>% select(id, teamName, e
 1.  Overall Percentage of Wins and Losses for the Playoff Season by Team
     Name
 
-<!-- end list -->
+| Division     | Team with Highest Percent Wins | Team with Lowest Percent Losses |
+| ------------ | ------------------------------ | ------------------------------- |
+| Atlantic     | Montréal Canadiens             | Florida Panthers                |
+| Metropolitan | New York Islanders             | Columbus Blue Jackets           |
+| Central      | Colorado Avalanche             | Minnesota Wild                  |
+| Pacific      | Edmonton Oilers                | Los Angeles Kings               |
 
-    |Division    |Team with Highest Percent Wins| Team with Lowest Percent Losses|
-    |------------|------------------------------|--------------------------------|
-    |Atlantic    |Montréal Canadiens            |Florida Panthers                |
-    |Metropolitan|New York Islanders            |Columbus Blue Jackets           |
-    |Central     |Colorado Avalanche            |Minnesota Wild                  |
-    |Pacific     |Edmonton Oilers               |Los Angeles Kings               |
-    
-    Not only do the Montréal Candiens have the highest pecentage of wins for the Atlantic Division but they also hold that record for all current teams in the National Hockey League.
+Not only do the Montréal Candiens have the highest pecentage of wins for
+the Atlantic Division but they also hold that record for all current
+teams in the National Hockey League.
 
 ``` r
 table_all_wl <- total_teams %>% arrange(Conference, Division, desc(PercentWins)) %>% 
@@ -2019,13 +2019,11 @@ Western
 
 2.  Overall Percentage of Wins and Losses for the Playoff Season by
     Division:
-    
-    Looking at the table below it is interesting to note that the
-    Percentage of Wins and Losses for all Playoff Games is fairly even
-    among the 4 Division. However, the Atlantic Division has been in the
-    Playoff games almost almost 1000 more times then the next division.
 
-<!-- end list -->
+Looking at the table below it is interesting to note that the Percentage
+of Wins and Losses for all Playoff Games is fairly even among the 4
+Division. However, the Atlantic Division has been in the Playoff games
+almost almost 1000 more times then the next division.
 
 ``` r
 table_div_wl <- total_teams %>% group_by(Division, Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
@@ -2285,12 +2283,10 @@ Western
 
 3.  Overall Percentage of Wins and Losses for the Playoff Season by
     Conference:
-    
-    The Eastern Conference has a higher percentage of games won during
-    the Playoff Season and also has almost double the amount of games
-    played in the Playoffs.
 
-<!-- end list -->
+The Eastern Conference has a higher percentage of games won during the
+Playoff Season and also has almost double the amount of games played in
+the Playoffs.
 
 ``` r
 table_conf_wl <- total_teams %>% group_by(Conference) %>% summarise(wins = sum(wins), losses = sum(losses), gamesPlayed = sum(gamesPlayed)) %>%
