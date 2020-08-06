@@ -1,4 +1,4 @@
-Project 1
+NHL API Graphical Summaries
 ================
 Lauren Witek
 6/12/2020
